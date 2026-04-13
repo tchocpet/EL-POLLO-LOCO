@@ -333,6 +333,11 @@
     updateCollisionsAndCollections();
   }
 
+  /**
+   * Updates the player and camera position.
+   * @param {number} dtMs - Delta time in ms
+   * @param {number} dtSec - Delta time in seconds
+   */
   function updatePlayerAndCamera(dtMs, dtSec) {
     const introInput =
       App.player && App.player.isIntroDropping
@@ -342,6 +347,11 @@
     updateCamera(App.world, App.player);
   }
 
+  /**
+   * Updates all world entities and effects for the current frame.
+   * @param {number} dtMs - Delta time in ms
+   * @param {number} dtSec - Delta time in seconds
+   */
   function updateWorld(dtMs, dtSec) {
     updateClouds(dtSec);
     updateScreenShake(dtSec);
@@ -354,6 +364,9 @@
     updateWalkSound(dtSec);
   }
 
+  /**
+   * Updates all collision and collection checks for the current frame.
+   */
   function updateCollisionsAndCollections() {
     handleBottleEnemyHits(App);
     handleBottleBossHits(App);

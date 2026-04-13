@@ -1,12 +1,13 @@
 "use strict";
 
 /**
- * Kleiner Chicken-Gegner.
+ * Small chicken enemy object.
  */
 class SmallEnemy {
   /**
-   * @param {number} x - Startposition X
-   * @param {number} y - Startposition Y
+   * Creates a new small enemy instance.
+   * @param {number} x - Start position X
+   * @param {number} y - Start position Y
    */
   constructor(x, y) {
     this.x = x;
@@ -29,7 +30,7 @@ class SmallEnemy {
   }
 
   /**
-   * Lädt Bilder.
+   * Loads all small enemy images (walk and dead).
    */
   loadImages() {
     const walkPaths = [
@@ -49,10 +50,10 @@ class SmallEnemy {
   }
 
   /**
-   * Aktualisiert den Gegner.
-   * @param {number} dtMs - Delta in Millisekunden
-   * @param {number} dtSec - Delta in Sekunden
-   * @param {object} world - Welt
+   * Updates the small enemy state each frame.
+   * @param {number} dtMs - Delta time in milliseconds
+   * @param {number} dtSec - Delta time in seconds
+   * @param {object} world - World object
    */
   update(dtMs, dtSec, world) {
     if (this.dead) {
@@ -65,9 +66,9 @@ class SmallEnemy {
   }
 
   /**
-   * Aktualisiert Dead-Zustand.
-   * @param {number} dtMs - Delta in Millisekunden
-   * @param {number} dtSec - Delta in Sekunden
+   * Updates the dead state and removal timer.
+   * @param {number} dtMs - Delta time in milliseconds
+   * @param {number} dtSec - Delta time in seconds
    */
   updateDead(dtMs, dtSec) {
     this.deadTime += dtMs;
@@ -79,7 +80,7 @@ class SmallEnemy {
   }
 
   /**
-   * Markiert den Gegner als tot.
+   * Marks the small enemy as dead and starts the dead timer.
    */
   die() {
     if (this.dead) return;
@@ -89,9 +90,9 @@ class SmallEnemy {
   }
 
   /**
-   * Bewegt den Gegner.
-   * @param {number} dtSec - Delta in Sekunden
-   * @param {object} world - Welt
+   * Moves the small enemy horizontally and handles direction and world bounds.
+   * @param {number} dtSec - Delta time in seconds
+   * @param {object} world - World object
    */
   move(dtSec, world) {
     this.x += this.vx * dtSec;
@@ -106,8 +107,8 @@ class SmallEnemy {
   }
 
   /**
-   * Aktualisiert Animation.
-   * @param {number} dtMs - Delta in Millisekunden
+   * Updates the small enemy walk animation.
+   * @param {number} dtMs - Delta time in milliseconds
    */
   animate(dtMs) {
     this.animTime += dtMs;
@@ -121,11 +122,7 @@ class SmallEnemy {
   }
 
   /**
-   * Draws the small enemy (main entry point).
-   * @param {CanvasRenderingContext2D} ctx - Canvas context
-   */
-  /**
-   * Draws the small enemy on the canvas.
+   * Draws the small enemy on the canvas (main entry point).
    * Splits logic into helpers for dead, alive, and fallback drawing.
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
@@ -152,7 +149,7 @@ class SmallEnemy {
   }
 
   /**
-   * Draws the alive enemy image.
+   * Draws the alive small enemy image.
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    * @param {HTMLImageElement} img - Image to draw
    */
@@ -170,8 +167,8 @@ class SmallEnemy {
   }
 
   /**
-   * Zeichnet Dead-Bild.
-   * @param {CanvasRenderingContext2D} ctx - Canvas Kontext
+   * Draws the dead small enemy image or a fallback if not loaded.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
   drawDead(ctx) {
     if (this.deadImage && this.deadImage.complete) {
@@ -184,4 +181,9 @@ class SmallEnemy {
   }
 }
 
+/**
+ * Expose SmallEnemy class to the global window object.
+ * @global
+ * @class SmallEnemy
+ */
 window.SmallEnemy = SmallEnemy;

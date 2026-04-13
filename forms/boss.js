@@ -208,7 +208,7 @@ class Boss {
   }
 
   /**
-   * Boss stirbt.
+   * Kills the boss and sets its state to dead.
    */
   die() {
     if (this.dead) return;
@@ -221,16 +221,16 @@ class Boss {
   }
 
   /**
-   * Aktualisiert Boss-Phase.
-   * @param {number} health - Boss-Leben
+   * Updates the boss phase depending on health.
+   * @param {number} health - Boss health
    */
   updatePhase(health) {
     this.phaseTwo = health <= 50;
   }
 
   /**
-   * Aktualisiert Angriff-Timer.
-   * @param {number} dtSec - Delta in Sekunden
+   * Updates the attack and rush timers.
+   * @param {number} dtSec - Delta time in seconds
    */
   updateAttackTimers(dtSec) {
     if (this.attackCooldown > 0) {
@@ -247,8 +247,8 @@ class Boss {
   }
 
   /**
-   * Startet Rush-Angriff.
-   * @param {number} distanceToPlayer - Distanz zum Spieler
+   * Starts a rush attack if conditions are met.
+   * @param {number} distanceToPlayer - Distance to the player
    */
   tryStartRush(distanceToPlayer) {
     if (!this.phaseTwo) {
@@ -268,18 +268,6 @@ class Boss {
     this.attackCooldown = 2.2;
   }
 
-  /**
-   * Bewegt den Boss.
-   * @param {number} dtSec - Delta in Sekunden
-   * @param {object} world - Welt
-   * @param {object} player - Spieler
-   */
-  /**
-   * Moves the boss according to its state and player position.
-   * @param {number} dtSec - Delta time in seconds
-   * @param {object} world - World object
-   * @param {object} player - Player object
-   */
   /**
    * Moves the boss towards the player and clamps position within world bounds.
    * Splits logic into helpers for speed, proximity, direction, and clamping.
@@ -410,4 +398,9 @@ class Boss {
   }
 }
 
+/**
+ * Expose Boss class to the global window object.
+ * @global
+ * @class Boss
+ */
 window.Boss = Boss;

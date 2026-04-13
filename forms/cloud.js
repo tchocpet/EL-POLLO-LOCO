@@ -1,11 +1,12 @@
 "use strict";
 
 /**
- * Bewegte Wolke.
+ * Moving cloud object for the background.
  */
 class Cloud {
   /**
-   * @param {number} x - Startposition X
+   * Creates a new cloud instance.
+   * @param {number} x - Start position X
    */
   constructor(x = 0) {
     this.x = x;
@@ -19,18 +20,7 @@ class Cloud {
   }
 
   /**
-   * Aktualisiert die Wolke.
-   * @param {number} dtSec - Delta in Sekunden
-   * @param {object} world - Welt
-   */
-  /**
    * Updates the cloud position and handles looping.
-   * @param {number} dtSec - Delta time in seconds
-   * @param {object} world - World object
-   */
-  /**
-   * Updates the cloud position and handles looping.
-   * Splits logic into helpers for movement and looping.
    * @param {number} dtSec - Delta time in seconds
    * @param {object} world - World object
    */
@@ -39,10 +29,6 @@ class Cloud {
     this.handleCloudLoop(world);
   }
 
-  /**
-   * Moves the cloud horizontally.
-   * @param {number} dtSec - Delta time in seconds
-   */
   /**
    * Moves the cloud horizontally based on speed and delta time.
    * @param {number} dtSec - Delta time in seconds
@@ -76,4 +62,9 @@ class Cloud {
   }
 }
 
+/**
+ * Expose Cloud class to the global window object.
+ * @global
+ * @class Cloud
+ */
 window.Cloud = Cloud;

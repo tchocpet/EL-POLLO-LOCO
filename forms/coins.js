@@ -1,12 +1,13 @@
 "use strict";
 
 /**
- * Coin zum Einsammeln.
+ * Collectible coin object.
  */
 class Coin {
   /**
-   * @param {number} x - Startposition X
-   * @param {number} y - Startposition Y
+   * Creates a new coin instance.
+   * @param {number} x - Start position X
+   * @param {number} y - Start position Y
    */
   constructor(x, y) {
     this.x = x;
@@ -21,8 +22,8 @@ class Coin {
   }
 
   /**
-   * Aktualisiert die Coin.
-   * @param {number} dtMs - Delta in Millisekunden
+   * Updates the coin animation state.
+   * @param {number} dtMs - Delta time in milliseconds
    */
   update(dtMs) {
     if (this.collected) {
@@ -38,11 +39,7 @@ class Coin {
   }
 
   /**
-   * Draws the coin (main entry point).
-   * @param {CanvasRenderingContext2D} ctx - Canvas context
-   */
-  /**
-   * Draws the coin on the canvas.
+   * Draws the coin on the canvas (main entry point).
    * Splits logic into helpers for body, border, and shine.
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
@@ -87,4 +84,9 @@ class Coin {
   }
 }
 
+/**
+ * Expose Coin class to the global window object.
+ * @global
+ * @class Coin
+ */
 window.Coin = Coin;

@@ -1,5 +1,9 @@
 "use strict";
 
+/**
+ * Spawns the endboss and initializes its properties in the game app.
+ * @param {Object} App - The main game application object.
+ */
 function spawnEndboss(App) {
   App.endboss = new Boss(App.world.levelW - 360, App.world.groundY - 280);
   App.bossHealth = 100;
@@ -7,6 +11,10 @@ function spawnEndboss(App) {
   App.bossActive = false;
 }
 
+/**
+ * Spawns all coins at predefined positions and updates the app's coin list.
+ * @param {Object} App - The main game application object.
+ */
 function spawnCoins(App) {
   App.coins = [];
 
@@ -40,6 +48,10 @@ function spawnCoins(App) {
   App.maxCoins = App.coins.length;
 }
 
+/**
+ * Spawns all enemies (big and small) at predefined positions and updates the app's enemy list.
+ * @param {Object} App - The main game application object.
+ */
 function spawnEnemies(App) {
   App.enemies = [];
 
@@ -64,6 +76,10 @@ function spawnEnemies(App) {
   });
 }
 
+/**
+ * Spawns all ground bottles at predefined positions and updates the app's ground bottle list.
+ * @param {Object} App - The main game application object.
+ */
 function spawnGroundBottles(App) {
   App.groundBottles = [];
 
@@ -90,10 +106,23 @@ function spawnGroundBottles(App) {
   });
 }
 
+/**
+ * Spawns clouds at fixed positions and updates the app's cloud list.
+ * @param {Object} App - The main game application object.
+ */
 function spawnClouds(App) {
   App.clouds = [new Cloud(0), new Cloud(900), new Cloud(1800), new Cloud(2700)];
 }
 
+/**
+ * Expose spawner functions to the global window object.
+ * @global
+ * @function spawnEndboss
+ * @function spawnCoins
+ * @function spawnEnemies
+ * @function spawnGroundBottles
+ * @function spawnClouds
+ */
 window.spawnEndboss = spawnEndboss;
 window.spawnCoins = spawnCoins;
 window.spawnEnemies = spawnEnemies;

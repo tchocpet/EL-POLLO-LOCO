@@ -129,12 +129,23 @@
     }, 32);
   }
 
+  /**
+   * Prepare the text element for typing by clearing previous content and resetting the character index.
+   * @param {HTMLElement} textEl - The text element to prepare.
+   */
   function prepareTyping(textEl) {
     clearTyping();
     textEl.textContent = "";
     charIndex = 0;
   }
 
+  /**
+   * Handles the skip request during typing. If skip is requested, immediately finishes the line.
+   * @param {string} line - The line to display.
+   * @param {HTMLElement} textEl - The text element to update.
+   * @param {Function} onDone - Callback after line is done.
+   * @returns {boolean} True if skip was handled, otherwise false.
+   */
   function handleSkipRequested(line, textEl, onDone) {
     if (skipRequested) {
       skipRequested = false;
@@ -146,6 +157,12 @@
     return false;
   }
 
+  /**
+   * Types the next character of the line into the text element.
+   * @param {string} line - The line to type.
+   * @param {HTMLElement} textEl - The text element to update.
+   * @param {Function} onDone - Callback after line is done.
+   */
   function typeNextChar(line, textEl, onDone) {
     textEl.textContent += line.charAt(charIndex);
     charIndex++;
@@ -284,6 +301,19 @@
 
   document.addEventListener("DOMContentLoaded", setupUi);
 
+  /**
+   * Expose public UI/story functions to the global window object.
+   * @global
+   * @function toggleMobileBtns
+   * @function goToControlScreen
+   * @function goToBgstoryScreen
+   * @function storyScreenGoBack
+   * @function goBackToStartScreen
+   * @function skipTyping
+   * @function startStoryTelling
+   * @function setLoadingBtnText
+   * @function addButtonHoverEventListener
+   */
   window.toggleMobileBtns = toggleMobileBtns;
   window.goToControlScreen = goToControlScreen;
   window.goToBgstoryScreen = goToBgstoryScreen;

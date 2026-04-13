@@ -78,10 +78,10 @@ function getDefaultHitbox(obj) {
 }
 
 /**
- * Prüft AABB Kollision.
- * @param {object} a - Objekt A
- * @param {object} b - Objekt B
- * @returns {boolean}
+ * Checks for AABB (axis-aligned bounding box) collision between two objects.
+ * @param {object} a - First object
+ * @param {object} b - Second object
+ * @returns {boolean} True if the objects are colliding, otherwise false.
  */
 function isColliding(a, b) {
   const aa = getHitbox(a);
@@ -96,10 +96,10 @@ function isColliding(a, b) {
 }
 
 /**
- * Prüft Stomp-Hit.
- * @param {object} player - Spieler
- * @param {object} enemy - Gegner
- * @returns {boolean}
+ * Checks if the player performed a stomp hit on the enemy (from above).
+ * @param {object} player - The player object
+   @param {object} enemy - The enemy object
+ * @returns {boolean} True if the player stomped the enemy, otherwise false.
  */
 function isStompHit(player, enemy) {
   const p = getHitbox(player);
@@ -112,6 +112,13 @@ function isStompHit(player, enemy) {
   return player.vy > 0 && fromAbove;
 }
 
+/**
+ * Expose collision helper functions to the global window object.
+ * @global
+ * @function getHitbox
+ * @function isColliding
+ * @function isStompHit
+ */
 window.getHitbox = getHitbox;
 window.isColliding = isColliding;
 window.isStompHit = isStompHit;

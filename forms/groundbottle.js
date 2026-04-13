@@ -1,12 +1,13 @@
 "use strict";
 
 /**
- * Bodenflasche zum Einsammeln.
+ * Collectible ground bottle object.
  */
 class GroundBottle {
   /**
-   * @param {number} x - Startposition X
-   * @param {number} y - Startposition Y
+   * Creates a new ground bottle instance.
+   * @param {number} x - Start position X
+   * @param {number} y - Start position Y
    */
   constructor(x, y) {
     this.x = x;
@@ -24,7 +25,7 @@ class GroundBottle {
   }
 
   /**
-   * Lädt Bilder.
+   * Loads all ground bottle images.
    */
   loadImages() {
     const paths = [
@@ -40,8 +41,8 @@ class GroundBottle {
   }
 
   /**
-   * Aktualisiert die Bodenflasche.
-   * @param {number} dtMs - Delta in Millisekunden
+   * Updates the ground bottle animation state.
+   * @param {number} dtMs - Delta time in milliseconds
    */
   update(dtMs) {
     if (this.collected) {
@@ -57,11 +58,7 @@ class GroundBottle {
   }
 
   /**
-   * Draws the ground bottle (main entry point).
-   * @param {CanvasRenderingContext2D} ctx - Canvas context
-   */
-  /**
-   * Draws the ground bottle on the canvas.
+   * Draws the ground bottle on the canvas (main entry point).
    * Splits logic into helpers for image and fallback drawing.
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
@@ -102,4 +99,9 @@ class GroundBottle {
   }
 }
 
+/**
+ * Expose GroundBottle class to the global window object.
+ * @global
+ * @class GroundBottle
+ */
 window.GroundBottle = GroundBottle;

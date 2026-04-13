@@ -173,7 +173,7 @@ class Bottle {
   }
 
   /**
-   * Draws the bottle.
+   * Draws the bottle (rotation or splash animation).
    * @param {CanvasRenderingContext2D} ctx - Canvas context.
    */
   draw(ctx) {
@@ -227,4 +227,9 @@ class Bottle {
   }
 }
 
+/**
+ * Expose Bottle class to the global window object.
+ * @global
+ * @class Bottle
+ */
 window.Bottle = Bottle;

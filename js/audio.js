@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * Ensures all audio objects are created and configured.
+ * @param {object} App - Main app state
+ * @param {object} PATHS - Asset paths
+ */
 function ensureAudio(App, PATHS) {
   if (App.audio.bgMusic) return;
   createAllAudio(App, PATHS);
@@ -7,6 +12,11 @@ function ensureAudio(App, PATHS) {
   applyMuteState(App);
 }
 
+/**
+ * Creates all audio objects and assigns them to App.audio.
+ * @param {object} App - Main app state
+ * @param {object} PATHS - Asset paths
+ */
 function createAllAudio(App, PATHS) {
   App.audio.walk = createAudio(PATHS.audio.walk);
   App.audio.bgMusic = createAudio(PATHS.audio.bgMusic);
@@ -17,6 +27,10 @@ function createAllAudio(App, PATHS) {
   App.audio.bossHit = createAudio(PATHS.audio.bossHit);
 }
 
+/**
+ * Sets properties for background music and walk audio.
+ * @param {object} App - Main app state
+ */
 function setAudioProperties(App) {
   App.audio.walk.volume = 0.2;
   App.audio.bgMusic.loop = true;
@@ -24,6 +38,10 @@ function setAudioProperties(App) {
   setEffectVolumes(App);
 }
 
+/**
+ * Sets volume for all effect audio objects.
+ * @param {object} App - Main app state
+ */
 function setEffectVolumes(App) {
   App.audio.coin.volume = 0.35;
   App.audio.bottleCollect.volume = 0.35;
@@ -32,6 +50,10 @@ function setEffectVolumes(App) {
   App.audio.bossHit.volume = 0.35;
 }
 
+/**
+ * Applies mute state to all audio objects based on App.soundOn.
+ * @param {object} App - Main app state
+ */
 function applyMuteState(App) {
   const muted = !App.soundOn;
 
@@ -41,12 +63,20 @@ function applyMuteState(App) {
   });
 }
 
+/**
+ * Starts background music playback if enabled.
+ * @param {object} App - Main app state
+ */
 function startBackgroundMusic(App) {
   if (!App.audio.bgMusic || !App.soundOn) return;
   App.audio.bgMusic.currentTime = 0;
   App.audio.bgMusic.play().catch(() => {});
 }
 
+/**
+ * Stops background music playback and resets time.
+ * @param {object} App - Main app state
+ */
 function stopBackgroundMusic(App) {
   if (!App.audio.bgMusic) return;
   App.audio.bgMusic.pause();

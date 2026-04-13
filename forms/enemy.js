@@ -1,13 +1,14 @@
 "use strict";
 
 /**
- * Chicken-Gegner.
+ * Chicken enemy object.
  */
 class Enemy {
   /**
-   * @param {number} x - Startposition X
-   * @param {number} y - Startposition Y
-   * @param {string} type - Typ
+   * Creates a new enemy instance.
+   * @param {number} x - Start position X
+   * @param {number} y - Start position Y
+   * @param {string} type - Enemy type ("big" or "small")
    */
   constructor(x, y, type = "big") {
     this.x = x;
@@ -38,7 +39,7 @@ class Enemy {
   }
 
   /**
-   * Lädt Bilder.
+   * Loads all enemy images (walk and dead).
    */
   loadImages() {
     let walkPaths = [];
@@ -71,10 +72,10 @@ class Enemy {
   }
 
   /**
-   * Aktualisiert den Gegner.
-   * @param {number} dtMs - Delta in Millisekunden
-   * @param {number} dtSec - Delta in Sekunden
-   * @param {object} world - Welt
+   * Updates the enemy state each frame.
+   * @param {number} dtMs - Delta time in milliseconds
+   * @param {number} dtSec - Delta time in seconds
+   * @param {object} world - World object
    */
   update(dtMs, dtSec, world) {
     if (this.dead) {
@@ -87,9 +88,9 @@ class Enemy {
   }
 
   /**
-   * Aktualisiert Dead-Zustand.
-   * @param {number} dtMs - Delta in Millisekunden
-   * @param {number} dtSec - Delta in Sekunden
+   * Updates the dead state and removal timer.
+   * @param {number} dtMs - Delta time in milliseconds
+   * @param {number} dtSec - Delta time in seconds
    */
   updateDead(dtMs, dtSec) {
     this.deadTime += dtMs;
@@ -101,7 +102,7 @@ class Enemy {
   }
 
   /**
-   * Markiert den Gegner als tot.
+   * Marks the enemy as dead and starts the dead timer.
    */
   die() {
     if (this.dead) return;
@@ -111,9 +112,9 @@ class Enemy {
   }
 
   /**
-   * Bewegt den Gegner.
-   * @param {number} dtSec - Delta in Sekunden
-   * @param {object} world - Welt
+   * Moves the enemy horizontally and handles direction and world bounds.
+   * @param {number} dtSec - Delta time in seconds
+   * @param {object} world - World object
    */
   move(dtSec, world) {
     this.x += this.vx * dtSec;
@@ -129,8 +130,8 @@ class Enemy {
   }
 
   /**
-   * Aktualisiert Animation.
-   * @param {number} dtMs - Delta in Millisekunden
+   * Updates the enemy walk animation.
+   * @param {number} dtMs - Delta time in milliseconds
    */
   animate(dtMs) {
     this.animTime += dtMs;
@@ -146,11 +147,7 @@ class Enemy {
   }
 
   /**
-   * Draws the enemy (main entry point).
-   * @param {CanvasRenderingContext2D} ctx - Canvas context
-   */
-  /**
-   * Draws the enemy on the canvas.
+   * Draws the enemy on the canvas (main entry point).
    * Splits logic into helpers for dead, alive, and fallback drawing.
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
@@ -203,8 +200,8 @@ class Enemy {
   }
 
   /**
-   * Zeichnet Dead-Bild.
-   * @param {CanvasRenderingContext2D} ctx - Canvas Kontext
+   * Draws the dead enemy image or a fallback if not loaded.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
    */
   drawDead(ctx) {
     if (
@@ -231,4 +228,9 @@ class Enemy {
   }
 }
 
+/**
+ * Expose Enemy class to the global window object.
+ * @global
+ * @class Enemy
+ */
 window.Enemy = Enemy;

@@ -1,6 +1,15 @@
 "use strict";
 
+
+/**
+ * Represents the player character.
+ */
 class Player extends window.BaseEntity {
+  /**
+   * Creates a new Player instance.
+   * @param {number} [x=140] - Initial X position
+   * @param {number} [y=140] - Initial Y position
+   */
   constructor(x = 140, y = 140) {
     super(x, y, 50, 70);
     this.speed = 300;
@@ -9,6 +18,13 @@ class Player extends window.BaseEntity {
     this.grounded = false;
   }
 
+
+  /**
+   * Updates the player state for the current frame.
+   * @param {number} dt - Delta time in seconds
+   * @param {object} input - Input state
+   * @param {object} world - World object
+   */
   update(dt, input, world) {
     const dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
     this.vx = dir * this.speed;
@@ -32,6 +48,11 @@ class Player extends window.BaseEntity {
     }
   }
 
+  /**
+   * Draws the player on the canvas.
+   * @param {CanvasRenderingContext2D} ctx - Canvas context
+   * @param {number} [camX=0] - Camera X offset
+   */
   draw(ctx, camX = 0) {
     ctx.fillStyle = "rgba(255,255,255,0.90)";
     ctx.fillRect(this.x - camX, this.y, this.w, this.h);

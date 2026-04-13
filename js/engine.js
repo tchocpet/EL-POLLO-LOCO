@@ -5,6 +5,10 @@ window.Engine = (function () {
   let last = 0;
   let running = false;
 
+  /**
+   * Starts the game engine loop.
+   * @param {function} tick - Callback function called each frame with (dt, now)
+   */
   function start(tick) {
     stop();
     running = true;
@@ -22,6 +26,9 @@ window.Engine = (function () {
     rafId = requestAnimationFrame(loop);
   }
 
+  /**
+   * Stops the game engine loop.
+   */
   function stop() {
     running = false;
     if (rafId) cancelAnimationFrame(rafId);

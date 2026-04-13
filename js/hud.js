@@ -84,20 +84,40 @@ function drawHUD(ctx, App) {
   drawAllHUDComponents(ctx, App);
 }
 
+/**
+ * Draws all HUD components (bottle, health, coin).
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {object} App - Main app state
+ */
 function drawAllHUDComponents(ctx, App) {
   drawBottleHUDComponent(ctx, App);
   drawHealthHUDComponent(ctx, App);
   drawCoinHUDComponent(ctx, App);
 }
 
+/**
+ * Draws the bottle HUD component.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {object} App - Main app state
+ */
 function drawBottleHUDComponent(ctx, App) {
   drawBottleHUD(ctx, App);
 }
 
+/**
+ * Draws the health HUD component.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {object} App - Main app state
+ */
 function drawHealthHUDComponent(ctx, App) {
   drawHealthHUD(ctx, App);
 }
 
+/**
+ * Draws the coin HUD component.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {object} App - Main app state
+ */
 function drawCoinHUDComponent(ctx, App) {
   drawCoinHUD(ctx, App);
 }
@@ -169,6 +189,11 @@ function drawCoinHUD(ctx, App) {
   }
 }
 
+/**
+ * Draws the boss area text overlay.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {object} App - Main app state
+ */
 function drawBossAreaText(ctx, App) {
   if (!App.bossActive || App.gameWon || !App.bossAreaShown) return;
 
@@ -183,6 +208,11 @@ function drawBossAreaText(ctx, App) {
   ctx.restore();
 }
 
+/**
+ * Draws the boss phase text overlay.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {object} App - Main app state
+ */
 function drawBossPhaseText(ctx, App) {
   if (App.bossPhaseTextTime <= 0) return;
 
@@ -197,6 +227,12 @@ function drawBossPhaseText(ctx, App) {
   ctx.restore();
 }
 
+/**
+ * Draws the damage overlay when the player is hit.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {object} App - Main app state
+ * @param {function} nowMs - Function returning current time in ms
+ */
 function drawDamageOverlay(ctx, App, nowMs) {
   const sinceHit = nowMs() - App.lastHitTime;
   if (sinceHit > 120) return;
@@ -205,6 +241,11 @@ function drawDamageOverlay(ctx, App, nowMs) {
   ctx.fillRect(0, 0, App.world.w, App.world.h);
 }
 
+/**
+ * Draws the pause overlay.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context
+ * @param {object} App - Main app state
+ */
 function drawPauseOverlay(ctx, App) {
   ctx.fillStyle = "rgba(0, 0, 0, 0.35)";
   ctx.fillRect(0, 0, App.world.w, App.world.h);

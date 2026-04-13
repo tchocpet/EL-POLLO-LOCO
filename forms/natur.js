@@ -1,10 +1,11 @@
 "use strict";
 
 /**
- * Player character.
+ * Player character object.
  */
 class Natur {
   /**
+   * Creates a new player character instance.
    * @param {number} x - Start position X
    * @param {number} y - Start position Y
    */
@@ -62,7 +63,7 @@ class Natur {
   }
 
   /**
-   * Loads images.
+   * Loads all player images (walk, jump, hurt, throw, idle, sleep).
    */
   loadImages() {
     const walkPaths = [
@@ -130,7 +131,7 @@ class Natur {
   }
 
   /**
-   * Resets the player character.
+   * Resets the player character to initial state.
    * @param {number} groundY - Ground height
    */
   reset(groundY) {
@@ -192,7 +193,7 @@ class Natur {
   }
 
   /**
-   * Player takes damage.
+   * Sets the player to hurt state.
    */
   takeHit() {
     this.hurtTime = 0.35;
@@ -201,7 +202,7 @@ class Natur {
   }
 
   /**
-   * Player throws a bottle.
+   * Sets the player to throw state.
    */
   startThrow() {
     this.throwTime = 0.3;
@@ -210,10 +211,10 @@ class Natur {
   }
 
   /**
-   * Updates the player character.
-   * @param {number} dtMs - Delta in milliseconds
-   * @param {number} dtSec - Delta in seconds
-   * @param {object} input - Loaded inputs
+   * Updates the player character state each frame.
+   * @param {number} dtMs - Delta time in milliseconds
+   * @param {number} dtSec - Delta time in seconds
+   * @param {object} input - Input state
    * @param {object} world - World object
    * @param {object} assets - Loaded assets
    */
@@ -233,8 +234,8 @@ class Natur {
   }
 
   /**
-   * Updates hurt state.
-   * @param {number} dtSec - Delta in seconds
+   * Updates the hurt state timer.
+   * @param {number} dtSec - Delta time in seconds
    */
   updateHurt(dtSec) {
     if (this.hurtTime > 0) {
@@ -247,8 +248,8 @@ class Natur {
   }
 
   /**
-   * Updates throw state.
-   * @param {number} dtSec - Delta in seconds
+   * Updates the throw state timer.
+   * @param {number} dtSec - Delta time in seconds
    */
   updateThrow(dtSec) {
     if (this.throwTime > 0) {
@@ -262,8 +263,8 @@ class Natur {
 
   /**
    * Updates idle and sleep state.
-   * @param {number} dtSec - Delta in seconds
-   * @param {object} input - Input
+   * @param {number} dtSec - Delta time in seconds
+   * @param {object} input - Input state
    */
   updateIdleState(dtSec, input) {
     const moving =
@@ -289,9 +290,9 @@ class Natur {
   }
 
   /**
-   * Updates movement.
-   * @param {number} dtSec - Delta in seconds
-   * @param {object} input - Input
+   * Updates movement and handles jump, gravity, and world bounds.
+   * @param {number} dtSec - Delta time in seconds
+   * @param {object} input - Input state
    * @param {object} world - World object
    */
   updateMovement(dtSec, input, world) {
@@ -311,8 +312,8 @@ class Natur {
   }
 
   /**
-   * Handles jump.
-   * @param {object} input - Input
+   * Handles jump logic.
+   * @param {object} input - Input state
    * @param {number} floorY - Floor height
    */
   handleJump(input, floorY) {
@@ -336,8 +337,8 @@ class Natur {
   }
 
   /**
-   * Applies gravity.
-   * @param {number} dtSec - Delta in seconds
+   * Applies gravity to the player.
+   * @param {number} dtSec - Delta time in seconds
    * @param {number} floorY - Floor height
    */
   applyGravity(dtSec, floorY) {
@@ -354,7 +355,7 @@ class Natur {
   }
 
   /**
-   * Clamps the character inside the level.
+   * Clamps the character inside the level bounds.
    * @param {object} world - World object
    * @param {number} floorY - Floor height
    */
@@ -364,9 +365,9 @@ class Natur {
   }
 
   /**
-   * Updates animation.
-   * @param {number} dtMs - Delta in milliseconds
-   * @param {object} assets - Assets
+   * Updates all player animations (walk, jump, hurt, throw).
+   * @param {number} dtMs - Delta time in milliseconds
+   * @param {object} assets - Asset collection
    */
   updateAnimation(dtMs, assets) {
     this.updateWalkAnimation(dtMs, assets);
@@ -377,8 +378,8 @@ class Natur {
 
   /**
    * Updates walk animation.
-   * @param {number} dtMs - Delta in milliseconds
-   * @param {object} assets - Assets
+   * @param {number} dtMs - Delta time in milliseconds
+   * @param {object} assets - Asset collection
    */
   updateWalkAnimation(dtMs, assets) {
     const walking =
@@ -406,7 +407,7 @@ class Natur {
 
   /**
    * Updates jump animation.
-   * @param {number} dtMs - Delta in milliseconds
+   * @param {number} dtMs - Delta time in milliseconds
    */
   updateJumpAnimation(dtMs) {
     if (this.onGround || this.throwTime > 0 || this.images.jump.length === 0) {
@@ -427,7 +428,7 @@ class Natur {
 
   /**
    * Updates hurt animation.
-   * @param {number} dtMs - Delta in milliseconds
+   * @param {number} dtMs - Delta time in milliseconds
    */
   updateHurtAnimation(dtMs) {
     if (this.hurtTime <= 0 || this.images.hurt.length === 0) {
@@ -448,7 +449,7 @@ class Natur {
 
   /**
    * Updates throw animation.
-   * @param {number} dtMs - Delta in milliseconds
+   * @param {number} dtMs - Delta time in milliseconds
    */
   updateThrowAnimation(dtMs) {
     if (this.throwTime <= 0 || this.images.throw.length === 0) {
@@ -469,17 +470,7 @@ class Natur {
   }
 
   /**
-   * Draws the character.
-   * @param {CanvasRenderingContext2D} ctx - Canvas context
-   * @param {object} assets - Assets
-   */
-  /**
-   * Draws the player character (main entry point).
-   * @param {CanvasRenderingContext2D} ctx - Canvas context
-   * @param {object} assets - Loaded assets
-   */
-  /**
-   * Draws the player character on the canvas.
+   * Draws the player character on the canvas (main entry point).
    * Splits logic into helpers for sprite, sleep text, and fallback drawing.
    * @param {CanvasRenderingContext2D} ctx - Canvas context
    * @param {object} assets - Asset collection
@@ -756,4 +747,9 @@ class Natur {
   }
 }
 
+/**
+ * Expose Natur class to the global window object.
+ * @global
+ * @class Natur
+ */
 window.Natur = Natur;
