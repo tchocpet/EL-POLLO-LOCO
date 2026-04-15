@@ -11,7 +11,32 @@
     <link rel="stylesheet" href="style.css" />
   </head>
 
-  <body onload="init()">
+  <body
+    onload="
+      initHelpersModule();
+      initEntitiesModule();
+      initEngineModule();
+      initAudioModule();
+      initScreenModule();
+      initCameraModule();
+      initCollisionHelperModule();
+      initCollisionModule();
+      initHudModule();
+      initSpawnerModule();
+      initPlayerModule();
+      initBossModule();
+      initBottleModule();
+      initCloudModule();
+      initCoinModule();
+      initEnemyModule();
+      initGroundBottleModule();
+      initNaturModule();
+      initGameModule();
+      init();
+      initUiModule();
+      initUi();
+    "
+  >
     <div class="game-wrapper">
       <div class="game-container" id="fullscreen">
         <div class="game-area" id="game-area">
@@ -320,9 +345,16 @@
     <script src="helpers/collision.js"></script>
     <script src="helpers/camera.js"></script>
     <script src="js/helpers.js"></script>
-    <script src="js/gameCollision.js"></script>
-    <script src="js/spawner.js"></script>
     <script src="js/hud.js"></script>
+    <script src="js/gameCollision.js"></script>
+    <script src="js/gameState.js"></script>
+    <script src="js/gameAssets.js"></script>
+    <script src="js/gameInput.js"></script>
+    <script src="js/gameFlow.js"></script>
+    <script src="js/gameRender.js"></script>
+    <script src="js/gameUpdate.js"></script>
+    <script src="js/spawner.js"></script>
+
     <script src="js/audio.js"></script>
     <script src="js/game.js"></script>
   </body>

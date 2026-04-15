@@ -1,107 +1,139 @@
-"use strict";
-
 /**
- * Collectible ground bottle object.
+ * Initializes the ground bottle module and registers its public API.
  */
-class GroundBottle {
-  /**
-   * Creates a new ground bottle instance.
-   * @param {number} x - Start position X
-   * @param {number} y - Start position Y
-   */
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-
-    this.w = 38;
-    this.h = 52;
-
-    this.collected = false;
-    this.frame = 0;
-    this.animT = 0;
-
-    this.images = [];
-    this.loadImages();
-  }
-
-  /**
-   * Loads all ground bottle images.
-   */
-  loadImages() {
-    const paths = [
-      "img/6_salsa_bottle/1_salsa_bottle_on_ground.png",
-      "img/6_salsa_bottle/2_salsa_bottle_on_ground.png",
-    ];
-
-    paths.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-      this.images.push(img);
-    });
-  }
-
-  /**
-   * Updates the ground bottle animation state.
-   * @param {number} dtMs - Delta time in milliseconds
-   */
-  update(dtMs) {
-    if (this.collected) {
-      return;
-    }
-
-    this.animT += dtMs;
-
-    if (this.animT > 260) {
-      this.animT = 0;
-      this.frame = this.frame === 0 ? 1 : 0;
-    }
-  }
-
-  /**
-   * Draws the ground bottle on the canvas (main entry point).
-   * Splits logic into helpers for image and fallback drawing.
-   * @param {CanvasRenderingContext2D} ctx - Canvas context
-   */
-  draw(ctx) {
-    const img = this.images[this.frame];
-    if (this.isImageDrawable(img)) {
-      this.drawBottleImage(ctx, img);
-      return;
-    }
-    this.drawFallback(ctx);
-  }
-
-  /**
-   * Checks if an image is drawable.
-   * @param {HTMLImageElement} img - Image to check
-   * @returns {boolean} True if drawable
-   */
-  isImageDrawable(img) {
-    return img && img.complete && img.naturalWidth > 0;
-  }
-
-  /**
-   * Draws the bottle image.
-   * @param {CanvasRenderingContext2D} ctx - Canvas context
-   * @param {HTMLImageElement} img - Image to draw
-   */
-  drawBottleImage(ctx, img) {
-    ctx.drawImage(img, this.x, this.y, this.w, this.h);
-  }
-
-  /**
-   * Draws a fallback rectangle if no image is available.
-   * @param {CanvasRenderingContext2D} ctx - Canvas context
-   */
-  drawFallback(ctx) {
-    ctx.fillStyle = "#27ae60";
-    ctx.fillRect(this.x, this.y, this.w, this.h);
-  }
+function initGroundBottleModule() {
+  registerGroundBottleApi();
 }
 
 /**
- * Expose GroundBottle class to the global window object.
- * @global
- * @class GroundBottle
+ * Registers the GroundBottle class on the global window object.
  */
-window.GroundBottle = GroundBottle;
+function registerGroundBottleApi() {
+  window.GroundBottle = createGroundBottleClass();
+}
+
+/**
+ * Creates the GroundBottle class.
+ *
+ * @returns {typeof GroundBottle}
+ */
+function createGroundBottleClass() {
+  return class GroundBottle {
+    /**
+     * Creates a new ground bottle instance.
+     *
+     * @param {number} x - Start x position.
+     * @param {number} y - Start y position.
+     */
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.w = 38;
+      this.h = 52;
+      this.collected = false;
+      this.frame = 0;
+      this.animT = 0;
+      this.images = [];
+      loadGroundBottleImages(this);
+      this.offset = {
+        top: 10,
+        right: 8,
+        bottom: 6,
+        left: 8,
+      };
+    }
+
+    /**
+     * Updates the ground bottle animation for one frame.
+     *
+     * @param {number} dtMs - Delta time in milliseconds.
+     */
+    update(dtMs) {
+      if (this.collected) return;
+      updateGroundBottleAnimation(this, dtMs);
+    }
+
+    /**
+     * Draws the ground bottle.
+     *
+     * @param {CanvasRenderingContext2D} ctx - Canvas context.
+     */
+    draw(ctx) {
+      const image = this.images[this.frame];
+      if (isGroundBottleImageDrawable(image)) {
+        ctx.drawImage(image, this.x, this.y, this.w, this.h);
+        return;
+      }
+      drawGroundBottleFallback(this, ctx);
+    }
+  };
+}
+
+/**
+ * Loads all ground bottle images.
+ *
+ * @param {object} bottle - Ground bottle instance.
+ */
+function loadGroundBottleImages(bottle) {
+  getGroundBottlePaths().forEach((src) =>
+    pushGroundBottleImage(bottle.images, src),
+  );
+}
+
+/**
+ * Pushes one ground bottle image into the image list.
+ *
+ * @param {HTMLImageElement[]} list - Target image list.
+ * @param {string} src - Image source path.
+ */
+function pushGroundBottleImage(list, src) {
+  const image = new Image();
+  image.src = src;
+  list.push(image);
+}
+
+/**
+ * Returns ground bottle image paths.
+ *
+ * @returns {string[]}
+ */
+function getGroundBottlePaths() {
+  return [
+    "img/6_salsa_bottle/1_salsa_bottle_on_ground.png",
+    "img/6_salsa_bottle/2_salsa_bottle_on_ground.png",
+  ];
+}
+
+/**
+ * Updates the ground bottle animation state.
+ *
+ * @param {object} bottle - Ground bottle instance.
+ * @param {number} dtMs - Delta time in milliseconds.
+ */
+function updateGroundBottleAnimation(bottle, dtMs) {
+  bottle.animT += dtMs;
+  if (bottle.animT <= 260) return;
+  bottle.animT = 0;
+  bottle.frame = bottle.frame === 0 ? 1 : 0;
+}
+
+/**
+ * Returns whether a ground bottle image is drawable.
+ *
+ * @param {HTMLImageElement|null} image - Ground bottle image.
+ * @returns {boolean}
+ */
+function isGroundBottleImageDrawable(image) {
+  return !!image && image.complete && image.naturalWidth > 0;
+}
+
+/**
+ * Draws the fallback ground bottle.
+ *
+ * @param {object} bottle - Ground bottle instance.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context.
+ */
+function drawGroundBottleFallback(bottle, ctx) {
+  ctx.fillStyle = "#27ae60";
+  ctx.fillRect(bottle.x, bottle.y, bottle.w, bottle.h);
+}

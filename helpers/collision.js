@@ -1,8 +1,23 @@
-"use strict";
+/**
+ * Initializes the collision helper module and registers its public API.
+ */
+function initCollisionHelperModule() {
+  registerCollisionHelperApi();
+}
+
+/**
+ * Registers collision helper functions on the global window object.
+ */
+function registerCollisionHelperApi() {
+  window.getHitbox = getHitbox;
+  window.isColliding = isColliding;
+  window.isStompHit = isStompHit;
+}
 
 /**
  * Returns the reduced hitbox for a game object.
- * @param {object} obj - Game object
+ *
+ * @param {object} obj - Game object.
  * @returns {{x:number,y:number,w:number,h:number}}
  */
 function getHitbox(obj) {
@@ -15,6 +30,7 @@ function getHitbox(obj) {
 
 /**
  * Returns an empty hitbox.
+ *
  * @returns {{x:number,y:number,w:number,h:number}}
  */
 function getEmptyHitbox() {
@@ -22,8 +38,9 @@ function getEmptyHitbox() {
 }
 
 /**
- * Returns a hitbox with offset values.
- * @param {object} obj - Game object with offset
+ * Returns a hitbox with offset values applied.
+ *
+ * @param {object} obj - Game object with offset.
  * @returns {{x:number,y:number,w:number,h:number}}
  */
 function getOffsetHitbox(obj) {
@@ -36,8 +53,9 @@ function getOffsetHitbox(obj) {
 }
 
 /**
- * Returns the hitbox for the player character (Natur).
- * @param {object} obj - Natur instance
+ * Returns the hitbox for the player character.
+ *
+ * @param {object} obj - Natur instance.
  * @returns {{x:number,y:number,w:number,h:number}}
  */
 function getNaturHitbox(obj) {
@@ -50,8 +68,9 @@ function getNaturHitbox(obj) {
 }
 
 /**
- * Returns the hitbox for an enemy.
- * @param {object} obj - Enemy instance
+ * Returns the hitbox for a regular enemy.
+ *
+ * @param {object} obj - Enemy instance.
  * @returns {{x:number,y:number,w:number,h:number}}
  */
 function getEnemyHitbox(obj) {
@@ -65,7 +84,8 @@ function getEnemyHitbox(obj) {
 
 /**
  * Returns the default hitbox for an object.
- * @param {object} obj - Game object
+ *
+ * @param {object} obj - Game object.
  * @returns {{x:number,y:number,w:number,h:number}}
  */
 function getDefaultHitbox(obj) {
@@ -78,47 +98,55 @@ function getDefaultHitbox(obj) {
 }
 
 /**
- * Checks for AABB (axis-aligned bounding box) collision between two objects.
- * @param {object} a - First object
- * @param {object} b - Second object
- * @returns {boolean} True if the objects are colliding, otherwise false.
+ * Checks for AABB collision between two objects.
+ *
+ * @param {object} a - First object.
+ * @param {object} b - Second object.
+ * @returns {boolean}
  */
 function isColliding(a, b) {
-  const aa = getHitbox(a);
-  const bb = getHitbox(b);
+  const hitboxA = getHitbox(a);
+  const hitboxB = getHitbox(b);
+  return areHitboxesOverlapping(hitboxA, hitboxB);
+}
 
+/**
+ * Returns whether two hitboxes overlap.
+ *
+ * @param {{x:number,y:number,w:number,h:number}} a - First hitbox.
+ * @param {{x:number,y:number,w:number,h:number}} b - Second hitbox.
+ * @returns {boolean}
+ */
+function areHitboxesOverlapping(a, b) {
   return (
-    aa.x < bb.x + bb.w &&
-    aa.x + aa.w > bb.x &&
-    aa.y < bb.y + bb.h &&
-    aa.y + aa.h > bb.y
+    a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
   );
 }
 
 /**
- * Checks if the player performed a stomp hit on the enemy (from above).
- * @param {object} player - The player object
-   @param {object} enemy - The enemy object
- * @returns {boolean} True if the player stomped the enemy, otherwise false.
+ * Checks whether the player stomped an enemy from above.
+ *
+ * @param {object} player - Player object.
+ * @param {object} enemy - Enemy object.
+ * @returns {boolean}
  */
 function isStompHit(player, enemy) {
-  const p = getHitbox(player);
-  const e = getHitbox(enemy);
-
-  const playerBottom = p.y + p.h;
-  const enemyTop = e.y;
-  const fromAbove = playerBottom - enemyTop < 28;
-
-  return player.vy > 0 && fromAbove;
+  const playerHitbox = getHitbox(player);
+  const enemyHitbox = getHitbox(enemy);
+  return isFallingStomp(player, playerHitbox, enemyHitbox);
 }
 
 /**
- * Expose collision helper functions to the global window object.
- * @global
- * @function getHitbox
- * @function isColliding
- * @function isStompHit
+ * Returns whether the collision counts as a falling stomp.
+ *
+ * @param {object} player - Player object.
+ * @param {{x:number,y:number,w:number,h:number}} playerHitbox - Player hitbox.
+ * @param {{x:number,y:number,w:number,h:number}} enemyHitbox - Enemy hitbox.
+ * @returns {boolean}
  */
-window.getHitbox = getHitbox;
-window.isColliding = isColliding;
-window.isStompHit = isStompHit;
+function isFallingStomp(player, playerHitbox, enemyHitbox) {
+  const playerBottom = playerHitbox.y + playerHitbox.h;
+  const enemyTop = enemyHitbox.y;
+  const fromAbove = playerBottom - enemyTop < 28;
+  return player.vy > 0 && fromAbove;
+}

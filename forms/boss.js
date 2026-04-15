@@ -1,406 +1,589 @@
-"use strict";
-
 /**
- * Endboss (final boss enemy).
+ * Initializes the boss module and registers its public API.
  */
-class Boss {
-  /**
-   * Creates a new Boss instance.
-   * @param {number} x - Start position X
-   * @param {number} y - Start position Y
-   */
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-
-    this.w = 280;
-    this.h = 280;
-
-    this.vx = -90;
-    this.dead = false;
-    this.removable = false;
-    this.hurt = false;
-    this.facing = -1;
-
-    this.frame = 0;
-    this.animT = 0;
-    this.deadTime = 0;
-    this.hurtTime = 0;
-
-    this.active = false;
-    this.phaseTwo = false;
-
-    this.attackCooldown = 0;
-    this.rushTime = 0;
-    this.isRushing = false;
-
-    this.offset = {
-      top: 70,
-      left: 40,
-      right: 40,
-      bottom: 25,
-    };
-
-    this.walkImages = [];
-    this.hurtImages = [];
-    this.deadImages = [];
-    this.loadImages();
-  }
-
-  /**
-   * Loads all boss images (walk, hurt, dead).
-   */
-  loadImages() {
-    const walkPaths = [
-      "img/4_enemie_boss_chicken/1_walk/G1.png",
-      "img/4_enemie_boss_chicken/1_walk/G2.png",
-      "img/4_enemie_boss_chicken/1_walk/G3.png",
-      "img/4_enemie_boss_chicken/1_walk/G4.png",
-    ];
-
-    const hurtPaths = [
-      "img/4_enemie_boss_chicken/4_hurt/G21.png",
-      "img/4_enemie_boss_chicken/4_hurt/G22.png",
-      "img/4_enemie_boss_chicken/4_hurt/G23.png",
-    ];
-
-    const deadPaths = [
-      "img/4_enemie_boss_chicken/5_dead/G24.png",
-      "img/4_enemie_boss_chicken/5_dead/G25.png",
-      "img/4_enemie_boss_chicken/5_dead/G26.png",
-    ];
-
-    walkPaths.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-      this.walkImages.push(img);
-    });
-
-    hurtPaths.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-      this.hurtImages.push(img);
-    });
-
-    deadPaths.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-      this.deadImages.push(img);
-    });
-  }
-
-  /**
-   * Updates the boss state.
-   * @param {number} dtMs - Delta in milliseconds
-   * @param {number} dtSec - Delta in seconds
-   * @param {object} world - World object
-   * @param {object} player - Player object
-   * @param {number} health - Boss health
-   */
-
-  /**
-   * Updates the boss state each frame.
-   * @param {number} dtMs - Delta in milliseconds
-   * @param {number} dtSec - Delta in seconds
-   * @param {object} world - World object
-   * @param {object} player - Player object
-   * @param {number} health - Boss health
-   */
-  update(dtMs, dtSec, world, player, health) {
-    if (this.isDeadState(dtMs, dtSec)) return;
-    this.updateAliveState(dtSec, health, player, world, dtMs);
-  }
-
-  /**
-   * Checks if boss is dead and updates dead state.
-   * @param {number} dtMs - Delta in milliseconds
-   * @param {number} dtSec - Delta in seconds
-   * @returns {boolean} True if boss is dead
-   */
-  isDeadState(dtMs, dtSec) {
-    if (this.dead) {
-      this.updateDead(dtMs, dtSec);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Updates boss state when alive.
-   * @param {number} dtSec - Delta in seconds
-   * @param {number} health - Boss health
-   * @param {object} player - Player object
-   * @param {object} world - World object
-   * @param {number} dtMs - Delta in milliseconds
-   */
-  updateAliveState(dtSec, health, player, world, dtMs) {
-    this.updateState(dtSec, health);
-    const distanceToPlayer = this.getDistanceToPlayer(player);
-    this.checkActivation(distanceToPlayer);
-    if (!this.active) return;
-    this.handleActiveState(distanceToPlayer, dtSec, world, player, dtMs);
-  }
-
-  /**
-   * Calculates the distance to the player.
-   * @param {object} player - Player object
-   * @returns {number} Distance to player
-   */
-  getDistanceToPlayer(player) {
-    return this.x - player.x;
-  }
-
-  updateState(dtSec, health) {
-    this.updateHurt(dtSec);
-    this.updatePhase(health);
-    this.updateAttackTimers(dtSec);
-  }
-
-  checkActivation(distanceToPlayer) {
-    if (Math.abs(distanceToPlayer) < 750) {
-      this.active = true;
-    }
-  }
-
-  handleActiveState(distanceToPlayer, dtSec, world, player, dtMs) {
-    this.tryStartRush(distanceToPlayer);
-    this.move(dtSec, world, player);
-    this.animate(dtMs);
-  }
-
-  /**
-   * Updates the hurt timer and state.
-   * @param {number} dtSec - Delta in seconds
-   */
-  updateHurt(dtSec) {
-    if (this.hurtTime > 0) {
-      this.hurtTime -= dtSec;
-    }
-
-    if (this.hurtTime <= 0) {
-      this.hurt = false;
-      this.hurtTime = 0;
-    }
-  }
-
-  /**
-   * Updates the dead state and removal timer.
-   * @param {number} dtMs - Delta in milliseconds
-   * @param {number} dtSec - Delta in seconds
-   */
-  updateDead(dtMs, dtSec) {
-    this.deadTime += dtMs;
-    this.y += 90 * dtSec;
-
-    if (this.deadTime > 1400) {
-      this.removable = true;
-    }
-  }
-
-  /**
-   * Boss takes damage.
-   */
-  takeHit() {
-    if (this.dead) return;
-
-    this.hurt = true;
-    this.hurtTime = 0.35;
-  }
-
-  /**
-   * Kills the boss and sets its state to dead.
-   */
-  die() {
-    if (this.dead) return;
-
-    this.dead = true;
-    this.vx = 0;
-    this.deadTime = 0;
-    this.isRushing = false;
-    this.hurt = false;
-  }
-
-  /**
-   * Updates the boss phase depending on health.
-   * @param {number} health - Boss health
-   */
-  updatePhase(health) {
-    this.phaseTwo = health <= 50;
-  }
-
-  /**
-   * Updates the attack and rush timers.
-   * @param {number} dtSec - Delta time in seconds
-   */
-  updateAttackTimers(dtSec) {
-    if (this.attackCooldown > 0) {
-      this.attackCooldown -= dtSec;
-    }
-
-    if (this.rushTime > 0) {
-      this.rushTime -= dtSec;
-    }
-
-    if (this.rushTime <= 0) {
-      this.isRushing = false;
-    }
-  }
-
-  /**
-   * Starts a rush attack if conditions are met.
-   * @param {number} distanceToPlayer - Distance to the player
-   */
-  tryStartRush(distanceToPlayer) {
-    if (!this.phaseTwo) {
-      return;
-    }
-
-    if (this.attackCooldown > 0 || this.isRushing) {
-      return;
-    }
-
-    if (Math.abs(distanceToPlayer) > 280) {
-      return;
-    }
-
-    this.isRushing = true;
-    this.rushTime = 0.85;
-    this.attackCooldown = 2.2;
-  }
-
-  /**
-   * Moves the boss towards the player and clamps position within world bounds.
-   * Splits logic into helpers for speed, proximity, direction, and clamping.
-   * @param {number} dtSec - Delta in seconds
-   * @param {object} world - World object
-   * @param {object} player - Player object
-   */
-  move(dtSec, world, player) {
-    const speed = this.getMoveSpeed();
-    const leftLimit = 0;
-    const rightLimit = world.levelW - this.w;
-    const distanceX = player.x - this.x;
-    const closeToPlayer = this.isCloseToPlayer(distanceX);
-    if (!closeToPlayer) {
-      this.updateDirectionAndPosition(distanceX, speed, dtSec);
-    } else {
-      this.vx = 0;
-    }
-    this.clampPosition(leftLimit, rightLimit);
-  }
-
-  /**
-   * Returns the current move speed depending on boss state.
-   * @returns {number} Move speed
-   */
-  getMoveSpeed() {
-    if (this.isRushing) return 255;
-    if (this.phaseTwo) return 155;
-    return 100;
-  }
-
-  /**
-   * Checks if boss is close to the player.
-   * @param {number} distanceX - Distance to player
-   * @returns {boolean} True if close
-   */
-  isCloseToPlayer(distanceX) {
-    return Math.abs(distanceX) < 20;
-  }
-
-  /**
-   * Updates direction and position of the boss.
-   * @param {number} distanceX - Distance to player
-   * @param {number} speed - Move speed
-   * @param {number} dtSec - Delta time in seconds
-   */
-  updateDirectionAndPosition(distanceX, speed, dtSec) {
-    this.vx = distanceX < 0 ? -speed : speed;
-    this.facing = this.vx < 0 ? -1 : 1;
-    this.x += this.vx * dtSec;
-  }
-
-  /**
-   * Clamps boss position within world bounds.
-   * @param {number} leftLimit - Left boundary
-   * @param {number} rightLimit - Right boundary
-   */
-  clampPosition(leftLimit, rightLimit) {
-    if (this.x < leftLimit) this.x = leftLimit;
-    if (this.x > rightLimit) this.x = rightLimit;
-  }
-
-  /**
-   * Updates boss animation.
-   * @param {number} dtMs - Delta in milliseconds
-   */
-  animate(dtMs) {
-    const limit = this.isRushing ? 90 : this.phaseTwo ? 120 : 180;
-
-    this.animT += dtMs;
-
-    if (this.animT < limit) {
-      return;
-    }
-
-    this.animT = 0;
-
-    const maxFrames = this.hurt
-      ? this.hurtImages.length
-      : this.walkImages.length;
-    this.frame = (this.frame + 1) % Math.max(1, maxFrames);
-  }
-
-  /**
-   * Zeichnet den Boss.
-   * @param {CanvasRenderingContext2D} ctx - Canvas Kontext
-   */
-  draw(ctx) {
-    const img = this.getCurrentImage();
-
-    if (!img || !img.complete || img.naturalWidth === 0) {
-      ctx.fillStyle = "#c0392b";
-      ctx.fillRect(this.x, this.y, this.w, this.h);
-      return;
-    }
-
-    ctx.save();
-
-    if (this.facing > 0) {
-      ctx.translate(this.x + this.w, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(img, 0, this.y, this.w, this.h);
-    } else {
-      ctx.drawImage(img, this.x, this.y, this.w, this.h);
-    }
-
-    ctx.restore();
-  }
-
-  /**
-   * Gibt aktuelles Boss-Bild zurück.
-   * @returns {HTMLImageElement|null}
-   */
-  getCurrentImage() {
-    if (this.dead) {
-      return (
-        this.deadImages[
-          Math.min(this.deadImages.length - 1, Math.floor(this.deadTime / 180))
-        ] || null
-      );
-    }
-
-    if (this.hurt) {
-      return this.hurtImages[this.frame % this.hurtImages.length] || null;
-    }
-
-    return this.walkImages[this.frame % this.walkImages.length] || null;
-  }
+function initBossModule() {
+  registerBossApi();
 }
 
 /**
- * Expose Boss class to the global window object.
- * @global
- * @class Boss
+ * Registers the Boss class on the global window object.
  */
-window.Boss = Boss;
+function registerBossApi() {
+  window.Boss = createBossClass();
+}
+
+/**
+ * Creates the Boss class.
+ *
+ * @returns {typeof Boss}
+ */
+function createBossClass() {
+  return class Boss {
+    /**
+     * Creates a new boss instance.
+     *
+     * @param {number} x - Start x position.
+     * @param {number} y - Start y position.
+     */
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.w = 280;
+      this.h = 280;
+      this.vx = -90;
+      this.dead = false;
+      this.removable = false;
+      this.hurt = false;
+      this.facing = -1;
+      this.frame = 0;
+      this.animT = 0;
+      this.deadTime = 0;
+      this.hurtTime = 0;
+      this.active = false;
+      this.phaseTwo = false;
+      this.attackCooldown = 0;
+      this.rushTime = 0;
+      this.isRushing = false;
+      this.offset = createBossOffset();
+      this.walkImages = [];
+      this.hurtImages = [];
+      this.deadImages = [];
+      loadBossImages(this);
+    }
+
+    /**
+     * Updates the boss state for one frame.
+     *
+     * @param {number} dtMs - Delta time in milliseconds.
+     * @param {number} dtSec - Delta time in seconds.
+     * @param {object} world - World state.
+     * @param {object} player - Player state.
+     * @param {number} health - Boss health.
+     */
+    update(dtMs, dtSec, world, player, health) {
+      if (isBossDeadState(this, dtMs, dtSec)) return;
+      updateAliveBossState(this, dtMs, dtSec, world, player, health);
+    }
+
+    /**
+     * Sets the boss to hurt state.
+     */
+    takeHit() {
+      if (this.dead) return;
+      this.hurt = true;
+      this.hurtTime = 0.35;
+    }
+
+    /**
+     * Kills the boss.
+     */
+    die() {
+      if (this.dead) return;
+      this.dead = true;
+      this.vx = 0;
+      this.deadTime = 0;
+      this.isRushing = false;
+      this.hurt = false;
+    }
+
+    /**
+     * Draws the boss.
+     *
+     * @param {CanvasRenderingContext2D} ctx - Canvas context.
+     */
+    draw(ctx) {
+      const image = getCurrentBossImage(this);
+      if (!isBossImageDrawable(image)) {
+        drawBossFallback(this, ctx);
+        return;
+      }
+      drawBossSprite(this, ctx, image);
+    }
+  };
+}
+
+/**
+ * Creates the boss hitbox offset.
+ *
+ * @returns {{top:number,left:number,right:number,bottom:number}}
+ */
+function createBossOffset() {
+  return {
+    top: 70,
+    left: 40,
+    right: 40,
+    bottom: 25,
+  };
+}
+
+/**
+ * Loads all boss images.
+ *
+ * @param {object} boss - Boss instance.
+ */
+function loadBossImages(boss) {
+  loadBossWalkImages(boss);
+  loadBossHurtImages(boss);
+  loadBossDeadImages(boss);
+}
+
+/**
+ * Loads walk images.
+ *
+ * @param {object} boss - Boss instance.
+ */
+function loadBossWalkImages(boss) {
+  getBossWalkPaths().forEach((src) => pushBossImage(boss.walkImages, src));
+}
+
+/**
+ * Loads hurt images.
+ *
+ * @param {object} boss - Boss instance.
+ */
+function loadBossHurtImages(boss) {
+  getBossHurtPaths().forEach((src) => pushBossImage(boss.hurtImages, src));
+}
+
+/**
+ * Loads dead images.
+ *
+ * @param {object} boss - Boss instance.
+ */
+function loadBossDeadImages(boss) {
+  getBossDeadPaths().forEach((src) => pushBossImage(boss.deadImages, src));
+}
+
+/**
+ * Pushes one image into an image list.
+ *
+ * @param {HTMLImageElement[]} list - Target image list.
+ * @param {string} src - Image source path.
+ */
+function pushBossImage(list, src) {
+  const image = new Image();
+  image.src = src;
+  list.push(image);
+}
+
+/**
+ * Returns walk image paths.
+ *
+ * @returns {string[]}
+ */
+function getBossWalkPaths() {
+  return [
+    "img/4_enemie_boss_chicken/1_walk/G1.png",
+    "img/4_enemie_boss_chicken/1_walk/G2.png",
+    "img/4_enemie_boss_chicken/1_walk/G3.png",
+    "img/4_enemie_boss_chicken/1_walk/G4.png",
+  ];
+}
+
+/**
+ * Returns hurt image paths.
+ *
+ * @returns {string[]}
+ */
+function getBossHurtPaths() {
+  return [
+    "img/4_enemie_boss_chicken/4_hurt/G21.png",
+    "img/4_enemie_boss_chicken/4_hurt/G22.png",
+    "img/4_enemie_boss_chicken/4_hurt/G23.png",
+  ];
+}
+
+/**
+ * Returns dead image paths.
+ *
+ * @returns {string[]}
+ */
+function getBossDeadPaths() {
+  return [
+    "img/4_enemie_boss_chicken/5_dead/G24.png",
+    "img/4_enemie_boss_chicken/5_dead/G25.png",
+    "img/4_enemie_boss_chicken/5_dead/G26.png",
+  ];
+}
+
+/**
+ * Returns whether the boss is dead and updates dead state.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtMs - Delta time in milliseconds.
+ * @param {number} dtSec - Delta time in seconds.
+ * @returns {boolean}
+ */
+function isBossDeadState(boss, dtMs, dtSec) {
+  if (!boss.dead) return false;
+  updateDeadBossState(boss, dtMs, dtSec);
+  return true;
+}
+
+/**
+ * Updates the alive boss state.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtMs - Delta time in milliseconds.
+ * @param {number} dtSec - Delta time in seconds.
+ * @param {object} world - World state.
+ * @param {object} player - Player state.
+ * @param {number} health - Boss health.
+ */
+function updateAliveBossState(boss, dtMs, dtSec, world, player, health) {
+  updateBossStateFlags(boss, dtSec, health);
+  const distance = getBossDistanceToPlayer(boss, player);
+  activateBossIfNeeded(boss, distance);
+  if (!boss.active) return;
+  updateActiveBossState(boss, dtMs, dtSec, world, player, distance);
+}
+
+/**
+ * Updates boss state flags.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtSec - Delta time in seconds.
+ * @param {number} health - Boss health.
+ */
+function updateBossStateFlags(boss, dtSec, health) {
+  updateBossHurtState(boss, dtSec);
+  updateBossPhase(boss, health);
+  updateBossTimers(boss, dtSec);
+}
+
+/**
+ * Returns the distance to the player.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {object} player - Player state.
+ * @returns {number}
+ */
+function getBossDistanceToPlayer(boss, player) {
+  return boss.x - player.x;
+}
+
+/**
+ * Activates the boss if the player is close enough.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} distance - Distance to player.
+ */
+function activateBossIfNeeded(boss, distance) {
+  if (Math.abs(distance) < 750) boss.active = true;
+}
+
+/**
+ * Updates the active boss state.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtMs - Delta time in milliseconds.
+ * @param {number} dtSec - Delta time in seconds.
+ * @param {object} world - World state.
+ * @param {object} player - Player state.
+ * @param {number} distance - Distance to player.
+ */
+function updateActiveBossState(boss, dtMs, dtSec, world, player, distance) {
+  tryStartBossRush(boss, distance);
+  moveBoss(boss, dtSec, world, player);
+  animateBoss(boss, dtMs);
+}
+
+/**
+ * Updates the hurt state.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtSec - Delta time in seconds.
+ */
+function updateBossHurtState(boss, dtSec) {
+  if (boss.hurtTime > 0) boss.hurtTime -= dtSec;
+  if (boss.hurtTime > 0) return;
+  boss.hurt = false;
+  boss.hurtTime = 0;
+}
+
+/**
+ * Updates the dead state.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtMs - Delta time in milliseconds.
+ * @param {number} dtSec - Delta time in seconds.
+ */
+function updateDeadBossState(boss, dtMs, dtSec) {
+  boss.deadTime += dtMs;
+  boss.y += 90 * dtSec;
+  if (boss.deadTime > 1400) boss.removable = true;
+}
+
+/**
+ * Updates the boss phase.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} health - Boss health.
+ */
+function updateBossPhase(boss, health) {
+  boss.phaseTwo = health <= 50;
+}
+
+/**
+ * Updates boss timers.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtSec - Delta time in seconds.
+ */
+function updateBossTimers(boss, dtSec) {
+  lowerBossAttackCooldown(boss, dtSec);
+  lowerBossRushTime(boss, dtSec);
+  if (boss.rushTime > 0) return;
+  boss.isRushing = false;
+}
+
+/**
+ * Lowers the attack cooldown.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtSec - Delta time in seconds.
+ */
+function lowerBossAttackCooldown(boss, dtSec) {
+  if (boss.attackCooldown > 0) boss.attackCooldown -= dtSec;
+}
+
+/**
+ * Lowers the rush timer.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtSec - Delta time in seconds.
+ */
+function lowerBossRushTime(boss, dtSec) {
+  if (boss.rushTime > 0) boss.rushTime -= dtSec;
+}
+
+/**
+ * Tries to start a rush attack.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} distance - Distance to player.
+ */
+function tryStartBossRush(boss, distance) {
+  if (!boss.phaseTwo) return;
+  if (boss.attackCooldown > 0 || boss.isRushing) return;
+  if (Math.abs(distance) > 280) return;
+  boss.isRushing = true;
+  boss.rushTime = 0.85;
+  boss.attackCooldown = 2.2;
+}
+
+/**
+ * Moves the boss.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtSec - Delta time in seconds.
+ * @param {object} world - World state.
+ * @param {object} player - Player state.
+ */
+function moveBoss(boss, dtSec, world, player) {
+  const speed = getBossMoveSpeed(boss);
+  const distance = player.x - boss.x;
+  if (isBossCloseToPlayer(distance)) return stopBossMovement(boss);
+  updateBossDirection(boss, distance, speed, dtSec);
+  clampBossPosition(boss, world);
+}
+
+/**
+ * Returns the current move speed.
+ *
+ * @param {object} boss - Boss instance.
+ * @returns {number}
+ */
+function getBossMoveSpeed(boss) {
+  if (boss.isRushing) return 255;
+  if (boss.phaseTwo) return 155;
+  return 100;
+}
+
+/**
+ * Returns whether the boss is close to the player.
+ *
+ * @param {number} distance - Distance to player.
+ * @returns {boolean}
+ */
+function isBossCloseToPlayer(distance) {
+  return Math.abs(distance) < 20;
+}
+
+/**
+ * Stops boss movement.
+ *
+ * @param {object} boss - Boss instance.
+ */
+function stopBossMovement(boss) {
+  boss.vx = 0;
+}
+
+/**
+ * Updates boss direction and position.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} distance - Distance to player.
+ * @param {number} speed - Move speed.
+ * @param {number} dtSec - Delta time in seconds.
+ */
+function updateBossDirection(boss, distance, speed, dtSec) {
+  boss.vx = distance < 0 ? -speed : speed;
+  boss.facing = boss.vx < 0 ? -1 : 1;
+  boss.x += boss.vx * dtSec;
+}
+
+/**
+ * Clamps the boss inside world bounds.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {object} world - World state.
+ */
+function clampBossPosition(boss, world) {
+  const minX = 0;
+  const maxX = world.levelW - boss.w;
+  if (boss.x < minX) boss.x = minX;
+  if (boss.x > maxX) boss.x = maxX;
+}
+
+/**
+ * Updates the boss animation.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {number} dtMs - Delta time in milliseconds.
+ */
+function animateBoss(boss, dtMs) {
+  const limit = getBossAnimationLimit(boss);
+  boss.animT += dtMs;
+  if (boss.animT < limit) return;
+  boss.animT = 0;
+  advanceBossFrame(boss);
+}
+
+/**
+ * Returns the animation limit.
+ *
+ * @param {object} boss - Boss instance.
+ * @returns {number}
+ */
+function getBossAnimationLimit(boss) {
+  if (boss.isRushing) return 90;
+  if (boss.phaseTwo) return 120;
+  return 180;
+}
+
+/**
+ * Advances the current boss frame.
+ *
+ * @param {object} boss - Boss instance.
+ */
+function advanceBossFrame(boss) {
+  const maxFrames = getBossFrameCount(boss);
+  boss.frame = (boss.frame + 1) % Math.max(1, maxFrames);
+}
+
+/**
+ * Returns the current frame count.
+ *
+ * @param {object} boss - Boss instance.
+ * @returns {number}
+ */
+function getBossFrameCount(boss) {
+  if (boss.hurt) return boss.hurtImages.length;
+  return boss.walkImages.length;
+}
+
+/**
+ * Returns the current boss image.
+ *
+ * @param {object} boss - Boss instance.
+ * @returns {HTMLImageElement|null}
+ */
+function getCurrentBossImage(boss) {
+  if (boss.dead) return getDeadBossImage(boss);
+  if (boss.hurt) return getHurtBossImage(boss);
+  return getWalkBossImage(boss);
+}
+
+/**
+ * Returns the current dead image.
+ *
+ * @param {object} boss - Boss instance.
+ * @returns {HTMLImageElement|null}
+ */
+function getDeadBossImage(boss) {
+  const index = Math.min(
+    boss.deadImages.length - 1,
+    Math.floor(boss.deadTime / 180),
+  );
+  return boss.deadImages[index] || null;
+}
+
+/**
+ * Returns the current hurt image.
+ *
+ * @param {object} boss - Boss instance.
+ * @returns {HTMLImageElement|null}
+ */
+function getHurtBossImage(boss) {
+  return boss.hurtImages[boss.frame % boss.hurtImages.length] || null;
+}
+
+/**
+ * Returns the current walk image.
+ *
+ * @param {object} boss - Boss instance.
+ * @returns {HTMLImageElement|null}
+ */
+function getWalkBossImage(boss) {
+  return boss.walkImages[boss.frame % boss.walkImages.length] || null;
+}
+
+/**
+ * Returns whether a boss image is drawable.
+ *
+ * @param {HTMLImageElement|null} image - Boss image.
+ * @returns {boolean}
+ */
+function isBossImageDrawable(image) {
+  return !!image && image.complete && image.naturalWidth > 0;
+}
+
+/**
+ * Draws the boss sprite.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context.
+ * @param {HTMLImageElement} image - Boss image.
+ */
+function drawBossSprite(boss, ctx, image) {
+  ctx.save();
+  if (boss.facing > 0) return drawFlippedBossSprite(boss, ctx, image);
+  ctx.drawImage(image, boss.x, boss.y, boss.w, boss.h);
+  ctx.restore();
+}
+
+/**
+ * Draws the flipped boss sprite.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context.
+ * @param {HTMLImageElement} image - Boss image.
+ */
+function drawFlippedBossSprite(boss, ctx, image) {
+  ctx.translate(boss.x + boss.w, 0);
+  ctx.scale(-1, 1);
+  ctx.drawImage(image, 0, boss.y, boss.w, boss.h);
+  ctx.restore();
+}
+
+/**
+ * Draws a fallback boss rectangle.
+ *
+ * @param {object} boss - Boss instance.
+ * @param {CanvasRenderingContext2D} ctx - Canvas context.
+ */
+function drawBossFallback(boss, ctx) {
+  ctx.fillStyle = "#c0392b";
+  ctx.fillRect(boss.x, boss.y, boss.w, boss.h);
+}
